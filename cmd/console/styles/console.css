@@ -188,6 +188,10 @@ header nav {
 	font-size: 2.4rem;
 }
 
+p {
+	font-size: 1.8rem;
+}
+
 section.context {
 	margin-top: 4rem;
 }
@@ -280,4 +284,24 @@ table td.icon,
 table th.icon {
 	text-align: center;
 	width: 7rem;
+}
+
+ul.entities {
+	font-size: 2.2rem;
+	list-style: none;
+	margin-top: 4rem;
+	padding: 0;
+}
+
+ul.entities li {
+	margin-bottom: 1.2rem;
+}
+
+ul.entities span.count {
+	font-weight: 500;
+	margin-left: 0.4rem;
+}
+
+ul.entities span.icon {
+	margin-right: 0.4rem;
 }

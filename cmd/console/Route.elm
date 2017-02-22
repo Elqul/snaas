@@ -12,6 +12,7 @@ type Route
     | Members
     | Rule String String
     | Rules String
+    | Users String
 
 
 -- HELPER
@@ -38,6 +39,9 @@ construct route =
         Rules appId ->
             "/apps/" ++ appId ++ "/rules"
 
+        Users appId ->
+            "/apps/" ++ appId ++ "/users"
+
 
 navigate : Route -> Cmd msg
 navigate route =
@@ -58,4 +62,5 @@ routes =
         , map Members (s "members")
         , map Rule (s "apps" </> string </> s "rules" </> string)
         , map Rules (s "apps" </> string </> s "rules")
+        , map Users (s "apps" </> string </> s "users")
         ]

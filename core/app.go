@@ -6,9 +6,25 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/tapglue/snaas/service/user"
+
+	"github.com/tapglue/snaas/service/rule"
+
 	"github.com/tapglue/snaas/platform/generate"
 	"github.com/tapglue/snaas/service/app"
 )
+
+type App struct {
+	Counts AppCounts
+
+	*app.App
+}
+
+// AppCounts bundles related entity counts together.
+type AppCounts struct {
+	Rules uint
+	Users uint
+}
 
 // AppCreateFunc creates a new App.
 type AppCreateFunc func(name, description string) (*app.App, error)
@@ -53,6 +69,56 @@ func AppFetch(apps app.Service) AppFetchFunc {
 		}
 
 		return as[0], nil
+	}
+}
+
+// AppFetchWithCountsFunc returns the App for the given id.
+type AppFetchWithCountsFunc func(id uint64) (*App, error)
+
+// AppWithCountsFetch returns the App for the given id.
+func AppFetchWithCounts(
+	apps app.Service,
+	rules rule.Service,
+	users user.Service,
+) AppFetchWithCountsFunc {
+	return func(id uint64) (*App, error) {
+		as, err := apps.Query(app.NamespaceDefault, app.QueryOptions{
+			Enabled: &defaultEnabled,
+			IDs: []uint64{
+				id,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if len(as) == 0 {
+			return nil, wrapError(ErrNotFound, "app (%d) not found", id)
+		}
+
+		a := as[0]
+
+		rs, err := rules.Query(a.Namespace(), rule.QueryOptions{
+			Deleted: &defaultDeleted,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		userCount, err := users.Count(a.Namespace(), user.QueryOptions{
+			Deleted: &defaultDeleted,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return &App{
+			App: a,
+			Counts: AppCounts{
+				Rules: uint(len(rs)),
+				Users: uint(userCount),
+			},
+		}, nil
 	}
 }
 

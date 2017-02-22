@@ -6,7 +6,6 @@ import Html.Events exposing (onClick, onInput)
 
 import App.Model exposing (App)
 
-
 viewAppItem : msg -> App -> Html msg
 viewAppItem msg app =
     let

@@ -44,6 +44,10 @@ view model =
 
                 Just (Route.Rules _) ->
                     pageRules model
+
+                Just (Route.Users _) ->
+                    pageNotFound
+
     in
         div [ class "content" ]
             ([ viewHeader model.zone ] ++ [ page ] ++ [ viewFooter model ])
@@ -54,22 +58,40 @@ pageApp {app, startTime, time} =
         view =
             case app of
                 NotAsked ->
-                    h3 [] [ text "Initialising" ]
+                    [ h3 [] [ text "Initialising" ] ]
 
                 Loading ->
-                    Loader.view 64 (rgb 63 91 96) (Loader.nextStep startTime time)
+                    [ Loader.view 64 (rgb 63 91 96) (Loader.nextStep startTime time) ]
 
                 Failure err ->
-                    h3 [] [ text ("Error: " ++ toString err) ]
+                    [ h3 [] [ text ("Error: " ++ toString err) ] ]
 
                 Success app ->
-                    h3 [] [ text ("App single view for " ++ app.name) ]
+                    [ h3 []
+                        [ text app.name
+                        ]
+                    , p [] [ text app.description ]
+                    , ul [ class "entities" ]
+                        [ li []
+                            [ a [ onClick (Navigate (Route.Rules app.id)), title "Rules" ]
+                                [ span [ class "icon nc-icon-glyph education_book-39" ] []
+                                , span [] [ text "Rules -" ]
+                                , span [ class "count" ] [ text (toString app.counts.rules) ]
+                                ]
+                            ]
+                        , li []
+                            [ a [ onClick (Navigate (Route.Users app.id)), title "Rules" ]
+                                [ span [ class "icon nc-icon-glyph users_multiple-11" ] []
+                                , span [] [ text "Users -" ]
+                                , span [ class "count" ] [ text (toString app.counts.users) ]
+                                ]
+                            ]
+                        ]
+                    ]
     in
         div []
             [ viewContextApps app
-            , Container.view (section [ class "highlight" ])
-                [ view
-                ]
+            , Container.view (section [ class "highlight" ]) view
             ]
 
 pageApps : Model -> Html Msg
@@ -221,7 +243,6 @@ viewContextRules appId rule =
                     ( False, span [] [] )
 
     in
-       --viewContext "Rules" (Navigate (Route.Rules appId)) viewRule selected "ui-3_filter-check"
        viewContext "Rules" (Navigate (Route.Rules appId)) viewRule selected "education_book-39"
 
 

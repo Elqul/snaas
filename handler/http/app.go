@@ -45,7 +45,7 @@ func AppList(fn core.AppListFunc) Handler {
 }
 
 // AppRetrieve returns the app for the requested id.
-func AppRetrieve(fn core.AppFetchFunc) Handler {
+func AppRetrieve(fn core.AppFetchWithCountsFunc) Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		id, err := extractAppID(r)
 		if err != nil {
@@ -59,26 +59,29 @@ func AppRetrieve(fn core.AppFetchFunc) Handler {
 			return
 		}
 
-		respondJSON(w, http.StatusOK, &payloadApp{app: a})
+		respondJSON(w, http.StatusOK, &payloadApp{app: a.App, counts: a.Counts})
 	}
 }
 
 type payloadApp struct {
 	app         *app.App
+	counts      core.AppCounts
 	Description string `json:"description"`
 	Name        string `json:"name"`
 }
 
 func (p *payloadApp) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		BackendToken string `json:"backend_token"`
-		Description  string `json:"description"`
-		Enabled      bool   `json:"enabled"`
-		ID           string `json:"id"`
-		Name         string `json:"name"`
-		Token        string `json:"token"`
+		BackendToken string            `json:"backend_token"`
+		Counts       *payloadAppCounts `json:"counts"`
+		Description  string            `json:"description"`
+		Enabled      bool              `json:"enabled"`
+		ID           string            `json:"id"`
+		Name         string            `json:"name"`
+		Token        string            `json:"token"`
 	}{
 		BackendToken: p.app.BackendToken,
+		Counts:       &payloadAppCounts{counts: p.counts},
 		Description:  p.app.Description,
 		Enabled:      p.app.Enabled,
 		ID:           strconv.FormatUint(p.app.ID, 10),
@@ -102,5 +105,19 @@ func (p *payloadApps) MarshalJSON() ([]byte, error) {
 		Apps []*payloadApp `json:"apps"`
 	}{
 		Apps: as,
+	})
+}
+
+type payloadAppCounts struct {
+	counts core.AppCounts
+}
+
+func (p *payloadAppCounts) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Rules uint `json:"rules"`
+		Users uint `json:"users"`
+	}{
+		Rules: p.counts.Rules,
+		Users: p.counts.Users,
 	})
 }

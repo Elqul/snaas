@@ -11,6 +11,7 @@ import Formo exposing (Form, initForm, validatorExist, validatorMaxLength, valid
 
 type alias App =
     { backend_token : String
+    , counts : Counts
     , description : String
     , enabled : Bool
     , id : String
@@ -18,19 +19,30 @@ type alias App =
     , token : String
     }
 
+type alias Counts =
+    { rules : Int
+    , users : Int
+    }
+
 
 -- DECODERS
 
 decode : Decode.Decoder App
 decode =
-    Decode.map6 App
+    Decode.map7 App
         (Decode.field "backend_token" Decode.string)
+        (Decode.field "counts" decodeCounts)
         (Decode.field "description" Decode.string)
         (Decode.field "enabled" Decode.bool)
         (Decode.field "id" Decode.string)
         (Decode.field "name" Decode.string)
         (Decode.field "token" Decode.string)
 
+decodeCounts : Decode.Decoder Counts
+decodeCounts =
+    Decode.map2 Counts
+        (Decode.field "rules" Decode.int)
+        (Decode.field "users" Decode.int)
 
 decodeList : Decode.Decoder (List App)
 decodeList =
