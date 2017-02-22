@@ -7,7 +7,6 @@ import Html.Attributes exposing (class, href, id, placeholder, title, type_, val
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onSubmit)
 import RemoteData exposing (RemoteData(Failure, Loading, NotAsked, Success), WebData)
 import Time exposing (Time)
-
 import Action exposing (..)
 import App.Model exposing (App)
 import App.View exposing (viewAppItem, viewAppsTable)
@@ -18,6 +17,7 @@ import Model exposing (Model)
 import Route
 import Rule.Model exposing (Rule)
 import Rule.View exposing (viewRuleItem, viewRuleTable)
+
 
 view : Model -> Html Msg
 view model =
@@ -47,13 +47,13 @@ view model =
 
                 Just (Route.Users _) ->
                     pageNotFound
-
     in
         div [ class "content" ]
             ([ viewHeader model.zone ] ++ [ page ] ++ [ viewFooter model ])
 
+
 pageApp : Model -> Html Msg
-pageApp {app, startTime, time} =
+pageApp { app, startTime, time } =
     let
         view =
             case app of
@@ -94,8 +94,9 @@ pageApp {app, startTime, time} =
             , Container.view (section [ class "highlight" ]) view
             ]
 
+
 pageApps : Model -> Html Msg
-pageApps {app, apps, appForm, newApp, startTime, time} =
+pageApps { app, apps, appForm, newApp, startTime, time } =
     let
         viewItem =
             (\app -> viewAppItem (SelectApp app.id) app)
@@ -129,6 +130,7 @@ pageApps {app, apps, appForm, newApp, startTime, time} =
             , Container.view (section [ class "highlight" ]) content
             ]
 
+
 pageDashboard : String -> Html Msg
 pageDashboard zone =
     Container.view (section [ id "dashboard" ])
@@ -148,15 +150,18 @@ pageDashboard zone =
             ]
         ]
 
+
 pageNotFound : Html Msg
 pageNotFound =
     Container.view (section [ class "highlight" ])
         [ h3 [] [ text "Looks like we couldn't find the page you were looking for." ]
         ]
 
+
 pageRule : Model -> Html Msg
 pageRule _ =
     div [] [ text "single rule" ]
+
 
 pageRules : Model -> Html Msg
 pageRules { app, appId, rule, rules, startTime, time } =
@@ -181,19 +186,19 @@ pageRules { app, appId, rule, rules, startTime, time } =
                 Success rules ->
                     if List.length rules == 0 then
                         [ h3 [] [ text "Looks like you haven't created a Rule yet." ]
-                        --, formApp newApp appForm startTime time
+                          --, formApp newApp appForm startTime time
                         ]
                     else
                         [ viewRuleTable viewItem rules
-                        --, formApp newApp appForm startTime time
+                          --, formApp newApp appForm startTime time
                         ]
-
     in
         div []
             [ viewContextApps app
             , viewContextRules appId rule
             , Container.view (section [ class "highlight" ]) content
             ]
+
 
 viewContext : String -> Msg -> Html Msg -> Bool -> String -> Html Msg
 viewContext entities listMsg view selected icon =
@@ -205,7 +210,6 @@ viewContext entities listMsg view selected icon =
 
                 False ->
                     ""
-
     in
         Container.view (section [ class ("context " ++ sectionClass) ])
             [ h2 []
@@ -217,6 +221,7 @@ viewContext entities listMsg view selected icon =
             , view
             ]
 
+
 viewContextApps : WebData App -> Html Msg
 viewContextApps app =
     let
@@ -227,9 +232,9 @@ viewContextApps app =
 
                 _ ->
                     ( False, span [] [] )
-
     in
-       viewContext "Apps" (Navigate Route.Apps) viewApp selected "ui-2_layers"
+        viewContext "Apps" (Navigate Route.Apps) viewApp selected "ui-2_layers"
+
 
 viewContextRules : String -> WebData Rule -> Html Msg
 viewContextRules appId rule =
@@ -241,9 +246,8 @@ viewContextRules appId rule =
 
                 _ ->
                     ( False, span [] [] )
-
     in
-       viewContext "Rules" (Navigate (Route.Rules appId)) viewRule selected "education_book-39"
+        viewContext "Rules" (Navigate (Route.Rules appId)) viewRule selected "education_book-39"
 
 
 viewDebug : Model -> Html Msg
@@ -272,6 +276,7 @@ viewFooter model =
         [ viewDebug model
         ]
 
+
 viewSelected : Msg -> String -> Html Msg
 viewSelected msg name =
     nav []
@@ -280,6 +285,8 @@ viewSelected msg name =
             , span [ class "icon nc-icon-outline arrows-2_skew-down" ] []
             ]
         ]
+
+
 
 -- FORM
 
@@ -315,20 +322,25 @@ formApp new appForm startTime time =
             Success _ ->
                 createForm
 
+
 formButtonReset : Msg -> String -> Html Msg
 formButtonReset msg name =
     button [ onClick msg, type_ "reset" ] [ text name ]
+
 
 formButtonSubmit : Msg -> String -> Html Msg
 formButtonSubmit msg name =
     button [] [ text name ]
 
+
 formElementContext : Form -> String -> Html Msg
 formElementContext form field =
     let
-        isFocused = elementIsFocused form field
+        isFocused =
+            elementIsFocused form field
 
-        isValidated = formIsValidated form
+        isValidated =
+            formIsValidated form
 
         error =
             if isFocused || isValidated then
@@ -340,16 +352,18 @@ formElementContext form field =
                         err
             else
                 ""
-
     in
         div [ class "error" ] [ text error ]
+
 
 formElementText : (String -> Msg) -> (String -> Msg) -> (String -> String -> Msg) -> Form -> String -> Html Msg
 formElementText blurMsg focusMsg inputMsg form field =
     let
-        isFocused = elementIsFocused form field
+        isFocused =
+            elementIsFocused form field
 
-        isValidated = formIsValidated form
+        isValidated =
+            formIsValidated form
 
         validationClass =
             if isFocused || isValidated then
@@ -361,7 +375,6 @@ formElementText blurMsg focusMsg inputMsg form field =
                         "valid"
             else
                 ""
-
     in
         div [ class ("element " ++ field) ]
             [ input
@@ -377,12 +390,15 @@ formElementText blurMsg focusMsg inputMsg form field =
             , formElementContext form field
             ]
 
+
 formGroup : List (Html Msg) -> Html Msg
 formGroup elements =
     div [ class "form-group" ] elements
 
 
+
 -- HELPER
+
 
 capitalise : String -> String
 capitalise s =
@@ -390,5 +406,5 @@ capitalise s =
         Nothing ->
             ""
 
-        Just (head, tail) ->
+        Just ( head, tail ) ->
             String.cons (Char.toUpper head) tail

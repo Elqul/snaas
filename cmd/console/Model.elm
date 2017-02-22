@@ -3,7 +3,6 @@ module Model exposing (Flags, Model, init)
 import Navigation
 import RemoteData exposing (RemoteData(..), WebData)
 import Time exposing (Time)
-
 import Action exposing (..)
 import App.Api exposing (getApp, getApps)
 import App.Model exposing (App, initAppForm)
@@ -12,9 +11,11 @@ import Route exposing (Route, parse)
 import Rule.Api exposing (listRules)
 import Rule.Model exposing (Rule)
 
+
 type alias Flags =
     { zone : String
     }
+
 
 type alias Model =
     { app : WebData App
@@ -31,12 +32,15 @@ type alias Model =
     , zone : String
     }
 
+
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init { zone } location =
     let
-        route = parse location
+        route =
+            parse location
 
-        model = initModel zone route
+        model =
+            initModel zone route
     in
         case route of
             Just (Route.App id) ->
@@ -56,7 +60,8 @@ init { zone } location =
                     ( (model Loading NotAsked appId), cmds )
 
             _ ->
-                ( (model NotAsked NotAsked ""), Cmd.none)
+                ( (model NotAsked NotAsked ""), Cmd.none )
+
 
 initModel : String -> Maybe Route -> WebData App -> WebData (List App) -> String -> Model
 initModel zone route app apps appId =

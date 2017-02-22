@@ -3,10 +3,10 @@ module Action exposing (Msg(..))
 import Navigation exposing (Location)
 import RemoteData exposing (WebData)
 import Time exposing (Time)
-
 import App.Model exposing (App)
 import Route exposing (Route)
 import Rule.Model exposing (Rule)
+
 
 type Msg
     = AppFormBlur String

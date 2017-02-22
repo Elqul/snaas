@@ -3,7 +3,6 @@ module Rule.View exposing (viewRuleItem, viewRuleTable)
 import Html exposing (Html, a, h2, section, span, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
-
 import Rule.Model exposing (Rule)
 
 
@@ -20,6 +19,7 @@ viewRuleItem msg rule =
             case rule.ecosystem of
                 1 ->
                     span [ class "nc-icon-outline design-2_apple", title "iOS" ] []
+
                 _ ->
                     span [ class "nc-icon-outline ui-2_alert", title "unknown" ] []
 
@@ -27,15 +27,18 @@ viewRuleItem msg rule =
             case rule.entity of
                 0 ->
                     span [ class "nc-icon-outline arrows-2_conversion", title "Connection" ] []
+
                 1 ->
                     span [ class "nc-icon-outline ui-1_bell-53", title "event" ] []
+
                 2 ->
                     span [ class "nc-icon-outline ui-1_database", title "Object" ] []
+
                 3 ->
                     span [ class "nc-icon-outline ui-2_like", title "Reaction" ] []
+
                 _ ->
                     span [ class "nc-icon-outline ui-2_alert", title "Unknown" ] []
-
     in
         tr [ onClick msg ]
             [ td [ class "icon" ] [ activated ]
@@ -44,6 +47,7 @@ viewRuleItem msg rule =
             , td [ class "icon" ] [ text (toString (List.length rule.recipients)) ]
             , td [] [ text rule.name ]
             ]
+
 
 viewRuleTable : (Rule -> Html msg) -> List Rule -> Html msg
 viewRuleTable item rules =

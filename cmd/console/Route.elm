@@ -3,7 +3,9 @@ module Route exposing (..)
 import Navigation exposing (Location, newUrl)
 import UrlParser exposing (Parser, (</>), map, oneOf, parsePath, top, s, string)
 
+
 -- MODEL
+
 
 type Route
     = App String
@@ -13,6 +15,7 @@ type Route
     | Rule String String
     | Rules String
     | Users String
+
 
 
 -- HELPER

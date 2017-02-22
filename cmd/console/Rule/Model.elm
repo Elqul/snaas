@@ -3,6 +3,7 @@ module Rule.Model exposing (Rule, decodeList)
 import Dict exposing (Dict)
 import Json.Decode as Decode
 
+
 -- MODEL
 
 
@@ -11,6 +12,7 @@ type alias Recipient =
     , templates : Dict String String
     , urn : String
     }
+
 
 type alias Rule =
     { active : Bool
@@ -21,6 +23,7 @@ type alias Rule =
     , name : String
     , recipients : List Recipient
     }
+
 
 
 -- DECODERS
@@ -37,9 +40,11 @@ decode =
         (Decode.field "name" Decode.string)
         (Decode.field "recipients" (Decode.list decodeRecipient))
 
+
 decodeList : Decode.Decoder (List Rule)
 decodeList =
     Decode.at [ "rules" ] (Decode.list decode)
+
 
 decodeRecipient : Decode.Decoder Recipient
 decodeRecipient =

@@ -2,7 +2,6 @@ module Main exposing (main)
 
 import AnimationFrame
 import Navigation
-
 import Action exposing (Msg(..))
 import Model exposing (Flags, Model, init)
 import Update exposing (update)
@@ -19,10 +18,10 @@ main =
         }
 
 
+
 -- SUBSCRIPTION
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     AnimationFrame.times Tick
-

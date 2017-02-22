@@ -1,13 +1,13 @@
 module Update exposing (update)
 
 import RemoteData exposing (RemoteData(Loading, NotAsked), WebData)
-
 import Action exposing (Msg(..))
 import Formo exposing (blurElement, elementValue, focusElement, updateElementValue, validateForm)
 import Model exposing (Flags, Model, init)
 import App.Api exposing (createApp)
 import App.Model exposing (initAppForm)
 import Route
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -23,11 +23,12 @@ update msg model =
 
         AppFormSubmit ->
             let
-                ( form, isValid ) = validateForm model.appForm
+                ( form, isValid ) =
+                    validateForm model.appForm
             in
                 case isValid of
                     True ->
-                        ( { model | newApp = Loading }, Cmd.map NewApp (createApp (elementValue model.appForm "name") (elementValue model.appForm "description") ) )
+                        ( { model | newApp = Loading }, Cmd.map NewApp (createApp (elementValue model.appForm "name") (elementValue model.appForm "description")) )
 
                     False ->
                         ( { model | appForm = form }, Cmd.none )
@@ -69,7 +70,10 @@ update msg model =
             in
                 ( { model | startTime = startTime, time = time }, Cmd.none )
 
+
+
 -- HELPER
+
 
 appendWebData : WebData (List a) -> WebData a -> WebData (List a)
 appendWebData list single =

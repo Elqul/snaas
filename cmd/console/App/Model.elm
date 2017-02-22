@@ -3,8 +3,8 @@ module App.Model exposing (App, decode, decodeList, encode, initAppForm)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
-
 import Formo exposing (Form, initForm, validatorExist, validatorMaxLength, validatorMinLength)
+
 
 -- MODEL
 
@@ -19,13 +19,16 @@ type alias App =
     , token : String
     }
 
+
 type alias Counts =
     { rules : Int
     , users : Int
     }
 
 
+
 -- DECODERS
+
 
 decode : Decode.Decoder App
 decode =
@@ -38,11 +41,13 @@ decode =
         (Decode.field "name" Decode.string)
         (Decode.field "token" Decode.string)
 
+
 decodeCounts : Decode.Decoder Counts
 decodeCounts =
     Decode.map2 Counts
         (Decode.field "rules" Decode.int)
         (Decode.field "users" Decode.int)
+
 
 decodeList : Decode.Decoder (List App)
 decodeList =
@@ -58,20 +63,23 @@ encode name description =
         |> Http.jsonBody
 
 
+
 -- FORM
 
 
 initAppForm : Form
 initAppForm =
     initForm
-        [ ( "description",
-            [ validatorExist
+        [ ( "description"
+          , [ validatorExist
             , validatorMaxLength 42
             , validatorMinLength 12
-            ] )
-        , ( "name",
-            [ validatorExist
+            ]
+          )
+        , ( "name"
+          , [ validatorExist
             , validatorMaxLength 16
             , validatorMinLength 3
-            ] )
+            ]
+          )
         ]
