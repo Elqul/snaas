@@ -165,6 +165,9 @@ type Service interface {
 	Query(namespace string, opts QueryOptions) (List, error)
 }
 
+// ServiceMiddleware is a chainable behaviour modifier for Service.
+type ServiceMiddleware func(Service) Service
+
 // Templates map languages to template strings.
 type Templates map[string]string
 

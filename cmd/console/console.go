@@ -17,6 +17,7 @@ import (
 	handler "github.com/tapglue/snaas/handler/http"
 	"github.com/tapglue/snaas/platform/metrics"
 	"github.com/tapglue/snaas/service/app"
+	"github.com/tapglue/snaas/service/rule"
 )
 
 const (
@@ -136,6 +137,16 @@ func main() {
 	)(apps)
 	apps = app.LogServiceMiddleware(logger, storeService)(apps)
 
+	var rules rule.Service
+	rules = rule.PostgresService(pgClient)
+	rules = rule.InstrumentServiceMiddleware(
+		component,
+		storeService,
+		serviceErrCount,
+		serviceOpCount,
+		serviceOpLatency,
+	)(rules)
+
 	// Setup middlewares.
 	var (
 		withConstraints = handler.Chain(
@@ -173,6 +184,13 @@ func main() {
 		handler.Wrap(
 			withConstraints,
 			handler.AppCreate(core.AppCreate(apps)),
+		),
+	)
+
+	router.Methods("GET").Path("/api/apps/{appID:[0-9]+}/rules").Name("ruleList").HandlerFunc(
+		handler.Wrap(
+			withConstraints,
+			handler.RuleList(core.RuleList(apps, rules)),
 		),
 	)
 

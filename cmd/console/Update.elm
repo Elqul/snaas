@@ -41,6 +41,9 @@ update msg model =
         FetchApps response ->
             ( { model | app = NotAsked, apps = response }, Cmd.none )
 
+        FetchRules response ->
+            ( { model | rules = response }, Cmd.none )
+
         ListApps ->
             ( model, Cmd.map LocationChange (Route.navigate Route.Apps) )
 

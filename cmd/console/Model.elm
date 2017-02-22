@@ -9,6 +9,8 @@ import App.Api exposing (getApp, getApps)
 import App.Model exposing (App, initAppForm)
 import Formo exposing (Form)
 import Route exposing (Route, parse)
+import Rule.Api exposing (listRules)
+import Rule.Model exposing (Rule)
 
 type alias Flags =
     { zone : String
@@ -18,9 +20,12 @@ type alias Model =
     { app : WebData App
     , apps : WebData (List App)
     , appForm : Form
+    , appId : String
     , focus : String
     , newApp : WebData App
     , route : Maybe Route
+    , rule : WebData Rule
+    , rules : WebData (List Rule)
     , startTime : Time
     , time : Time
     , zone : String
@@ -35,14 +40,24 @@ init { zone } location =
     in
         case route of
             Just (Route.App id) ->
-                ( (model Loading NotAsked), Cmd.map FetchApp (getApp id) )
+                ( (model Loading NotAsked id), Cmd.map FetchApp (getApp id) )
 
             Just (Route.Apps) ->
-                ( (model NotAsked Loading), Cmd.map FetchApps getApps )
+                ( (model NotAsked Loading ""), Cmd.map FetchApps getApps )
+
+            Just (Route.Rules appId) ->
+                let
+                    cmds =
+                        Cmd.batch
+                            [ Cmd.map FetchApp (getApp appId)
+                            , Cmd.map FetchRules (listRules appId)
+                            ]
+                in
+                    ( (model Loading NotAsked appId), cmds )
 
             _ ->
-                ( (model NotAsked NotAsked), Cmd.none)
+                ( (model NotAsked NotAsked ""), Cmd.none)
 
-initModel : String -> Maybe Route -> WebData App -> WebData (List App) -> Model
-initModel zone route app apps =
-    Model app apps initAppForm "" NotAsked route 0 0 zone
+initModel : String -> Maybe Route -> WebData App -> WebData (List App) -> String -> Model
+initModel zone route app apps appId =
+    Model app apps initAppForm appId "" NotAsked route NotAsked NotAsked 0 0 zone

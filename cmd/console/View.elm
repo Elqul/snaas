@@ -10,12 +10,14 @@ import Time exposing (Time)
 
 import Action exposing (..)
 import App.Model exposing (App)
-import App.View exposing (viewAppItem, viewAppsContext, viewAppsTable)
+import App.View exposing (viewAppItem, viewAppsTable)
 import Container
 import Formo exposing (Form, elementErrors, elementIsFocused, elementIsValid, elementValue, formIsValidated)
 import Loader
 import Model exposing (Model)
 import Route
+import Rule.Model exposing (Rule)
+import Rule.View exposing (viewRuleItem, viewRuleTable)
 
 view : Model -> Html Msg
 view model =
@@ -36,6 +38,12 @@ view model =
 
                 Just (Route.Members) ->
                     pageNotFound
+
+                Just (Route.Rule _ _) ->
+                    pageRule model
+
+                Just (Route.Rules _) ->
+                    pageRules model
     in
         div [ class "content" ]
             ([ viewHeader model.zone ] ++ [ page ] ++ [ viewFooter model ])
@@ -58,7 +66,7 @@ pageApp {app, startTime, time} =
                     h3 [] [ text ("App single view for " ++ app.name) ]
     in
         div []
-            [ viewAppsContext (Navigate Route.Apps) app
+            [ viewContextApps app
             , Container.view (section [ class "highlight" ])
                 [ view
                 ]
@@ -95,7 +103,7 @@ pageApps {app, apps, appForm, newApp, startTime, time} =
                         ]
     in
         div []
-            [ viewAppsContext (Navigate Route.Apps) app
+            [ viewContextApps app
             , Container.view (section [ class "highlight" ]) content
             ]
 
@@ -124,6 +132,99 @@ pageNotFound =
         [ h3 [] [ text "Looks like we couldn't find the page you were looking for." ]
         ]
 
+pageRule : Model -> Html Msg
+pageRule _ =
+    div [] [ text "single rule" ]
+
+pageRules : Model -> Html Msg
+pageRules { app, appId, rule, rules, startTime, time } =
+    let
+        viewItem =
+            (\rule -> viewRuleItem (Navigate (Route.Rule appId rule.id)) rule)
+
+        content =
+            case rules of
+                NotAsked ->
+                    [ h3 [] [ text "Initialising" ]
+                    ]
+
+                Loading ->
+                    [ Loader.view 64 (rgb 63 91 96) (Loader.nextStep startTime time)
+                    ]
+
+                Failure err ->
+                    [ h3 [] [ text ("Error: " ++ toString err) ]
+                    ]
+
+                Success rules ->
+                    if List.length rules == 0 then
+                        [ h3 [] [ text "Looks like you haven't created a Rule yet." ]
+                        --, formApp newApp appForm startTime time
+                        ]
+                    else
+                        [ viewRuleTable viewItem rules
+                        --, formApp newApp appForm startTime time
+                        ]
+
+    in
+        div []
+            [ viewContextApps app
+            , viewContextRules appId rule
+            , Container.view (section [ class "highlight" ]) content
+            ]
+
+viewContext : String -> Msg -> Html Msg -> Bool -> String -> Html Msg
+viewContext entities listMsg view selected icon =
+    let
+        sectionClass =
+            case selected of
+                True ->
+                    "selected"
+
+                False ->
+                    ""
+
+    in
+        Container.view (section [ class ("context " ++ sectionClass) ])
+            [ h2 []
+                [ a [ onClick listMsg ]
+                    [ span [ class ("icon nc-icon-glyph " ++ icon) ] []
+                    , span [] [ text entities ]
+                    ]
+                ]
+            , view
+            ]
+
+viewContextApps : WebData App -> Html Msg
+viewContextApps app =
+    let
+        ( selected, viewApp ) =
+            case app of
+                Success app ->
+                    ( True, viewSelected (Navigate (Route.App app.id)) app.name )
+
+                _ ->
+                    ( False, span [] [] )
+
+    in
+       viewContext "Apps" (Navigate Route.Apps) viewApp selected "ui-2_layers"
+
+viewContextRules : String -> WebData Rule -> Html Msg
+viewContextRules appId rule =
+    let
+        ( selected, viewRule ) =
+            case rule of
+                Success rule ->
+                    ( True, viewSelected (Navigate (Route.Rule appId rule.id)) rule.name )
+
+                _ ->
+                    ( False, span [] [] )
+
+    in
+       --viewContext "Rules" (Navigate (Route.Rules appId)) viewRule selected "ui-3_filter-check"
+       viewContext "Rules" (Navigate (Route.Rules appId)) viewRule selected "education_book-39"
+
+
 viewDebug : Model -> Html Msg
 viewDebug model =
     div [ class "debug" ]
@@ -150,6 +251,14 @@ viewFooter model =
         [ viewDebug model
         ]
 
+viewSelected : Msg -> String -> Html Msg
+viewSelected msg name =
+    nav []
+        [ a [ onClick msg ]
+            [ span [] [ text name ]
+            , span [ class "icon nc-icon-outline arrows-2_skew-down" ] []
+            ]
+        ]
 
 -- FORM
 

@@ -174,7 +174,7 @@ h3 {
 }
 
 header {
-	padding: 4rem 0 4rem 0;
+	padding: 4rem 0 0 0;
 }
 
 header div.container {
@@ -188,25 +188,29 @@ header nav {
 	font-size: 2.4rem;
 }
 
-section#context * {
+section.context {
+	margin-top: 4rem;
+}
+
+section.context * {
 	color: rgb(63, 91, 96);
 }
 
-section#context div.container {
+section.context div.container {
 	align-items: baseline;
 	display: flex;
 	justify-content: space-between;
 }
 
-section#context.selected div.container {
+section.context.selected div.container {
 	border-bottom: 0.1rem solid rgb(63, 91, 96);
 }
 
-section#context nav {
+section.context nav {
 	font-size: 2.4rem;
 }
 
-section#context nav span.icon {
+section.context nav span.icon {
 	margin-left: 1rem;
 }
 
@@ -261,17 +265,19 @@ table tbody {
 table tbody tr {
 	border-bottom: 0.1rem solid #efefef;
 	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+table tbody tr:hover {
+	background: rgb(236, 240, 241);
 }
 
 table tbody tr td {
 	padding: 1.4rem 0.8rem 0.8rem 0.4rem;
 }
 
-table tbody tr td.status {
+table td.icon,
+table th.icon {
 	text-align: center;
-	width: 5rem;
-}
-
-table tbody tr td.status div {
-	margin: 0 auto;
+	width: 7rem;
 }
