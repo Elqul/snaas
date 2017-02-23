@@ -111,7 +111,7 @@ func (c *CriteriaObject) Match(i interface{}) bool {
 // List is a Rule collection.
 type List []*Rule
 
-// Matcher to determine if a given state-change should trigger the Rule.
+// Matcher determines if a given state-change should trigger the Rule.
 type Matcher interface {
 	Match(c interface{}) bool
 }

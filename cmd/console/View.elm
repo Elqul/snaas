@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Char
 import Color exposing (rgb)
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (class, href, id, placeholder, title, type_, value)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onSubmit)
@@ -16,7 +17,7 @@ import Loader
 import Model exposing (Model)
 import Route
 import Rule.Model exposing (Rule)
-import Rule.View exposing (viewRuleItem, viewRuleTable)
+import Rule.View exposing (viewRuleDescription, viewRuleItem, viewRuleTable)
 
 
 view : Model -> Html Msg
@@ -55,43 +56,35 @@ view model =
 pageApp : Model -> Html Msg
 pageApp { app, startTime, time } =
     let
-        view =
-            case app of
-                NotAsked ->
-                    [ h3 [] [ text "Initialising" ] ]
-
-                Loading ->
-                    [ Loader.view 64 (rgb 63 91 96) (Loader.nextStep startTime time) ]
-
-                Failure err ->
-                    [ h3 [] [ text ("Error: " ++ toString err) ] ]
-
-                Success app ->
-                    [ h3 []
-                        [ text app.name
-                        ]
-                    , p [] [ text app.description ]
-                    , ul [ class "entities" ]
-                        [ li []
-                            [ a [ onClick (Navigate (Route.Rules app.id)), title "Rules" ]
-                                [ span [ class "icon nc-icon-glyph education_book-39" ] []
-                                , span [] [ text "Rules -" ]
-                                , span [ class "count" ] [ text (toString app.counts.rules) ]
-                                ]
+        viewApp app =
+            div []
+                [ h3 []
+                    [ text app.name
+                    ]
+                , p [] [ text app.description ]
+                , ul [ class "entities" ]
+                    [ li []
+                        [ a [ onClick (Navigate (Route.Rules app.id)), title "Rules" ]
+                            [ span [ class "icon nc-icon-glyph education_book-39" ] []
+                            , span [] [ text "Rules -" ]
+                            , span [ class "count" ] [ text (toString app.counts.rules) ]
                             ]
-                        , li []
-                            [ a [ onClick (Navigate (Route.Users app.id)), title "Rules" ]
-                                [ span [ class "icon nc-icon-glyph users_multiple-11" ] []
-                                , span [] [ text "Users -" ]
-                                , span [ class "count" ] [ text (toString app.counts.users) ]
-                                ]
+                        ]
+                    , li []
+                        [ a [ onClick (Navigate (Route.Users app.id)), title "Rules" ]
+                            [ span [ class "icon nc-icon-glyph users_multiple-11" ] []
+                            , span [] [ text "Users -" ]
+                            , span [ class "count" ] [ text (toString app.counts.users) ]
                             ]
                         ]
                     ]
+                ]
+
     in
         div []
             [ viewContextApps app
-            , Container.view (section [ class "highlight" ]) view
+            , Container.view (section [ class "highlight" ])
+                [ viewWebData viewApp startTime time app ]
             ]
 
 
@@ -101,33 +94,23 @@ pageApps { app, apps, appForm, newApp, startTime, time } =
         viewItem =
             (\app -> viewAppItem (SelectApp app.id) app)
 
-        content =
-            case apps of
-                NotAsked ->
-                    [ h3 [] [ text "Initialising" ]
+        viewApps apps =
+            if List.length apps == 0 then
+                div []
+                    [ h3 [] [ text "Looks like you haven't created an App yet." ]
+                    , formApp newApp appForm startTime time
+                    ]
+            else
+                div []
+                    [ viewAppsTable viewItem apps
+                    , formApp newApp appForm startTime time
                     ]
 
-                Loading ->
-                    [ Loader.view 64 (rgb 63 91 96) (Loader.nextStep startTime time)
-                    ]
-
-                Failure err ->
-                    [ h3 [] [ text ("Error: " ++ toString err) ]
-                    ]
-
-                Success apps ->
-                    if List.length apps == 0 then
-                        [ h3 [] [ text "Looks like you haven't created an App yet." ]
-                        , formApp newApp appForm startTime time
-                        ]
-                    else
-                        [ viewAppsTable viewItem apps
-                        , formApp newApp appForm startTime time
-                        ]
     in
         div []
             [ viewContextApps app
-            , Container.view (section [ class "highlight" ]) content
+            , Container.view (section [ class "highlight" ])
+                [ viewWebData viewApps startTime time apps ]
             ]
 
 
@@ -159,8 +142,62 @@ pageNotFound =
 
 
 pageRule : Model -> Html Msg
-pageRule _ =
-    div [] [ text "single rule" ]
+pageRule { app, appId, rule, startTime, time } =
+    let
+        viewTarget target =
+            div [ class "target" ]
+                [ span [] [ text "Target: " ]
+                , strong [] [ text (Rule.Model.targetString target) ]
+                ]
+
+        viewTemplate ( lang, template ) =
+            tr []
+                [ td [] [ text lang ]
+                , td [] [ text template ]
+                ]
+
+        viewTemplates templates =
+            table []
+                [ thead []
+                    [ tr []
+                        [ th [] [ text "lang" ]
+                        , th [] [ text "template" ]
+                        ]
+                    ]
+                , tbody [] (List.map viewTemplate (Dict.toList templates))
+                ]
+
+        viewRecipient recipient =
+            div [ class "recipient" ]
+                [ div [ class "meta" ]
+                    ( (List.map viewTarget recipient.targets)
+                    ++ [ div [ class "urn" ]
+                            [ span [] [ text "URN: " ]
+                            , pre [] [ text recipient.urn ]
+                            ]
+                        ]
+                    )
+                , div [ class "templates" ]
+                    [ span [] [ text "Templates: " ]
+                    , strong [] [ text (toString (List.length (Dict.toList recipient.templates))) ]
+                    ]
+                ]
+
+        viewRule rule =
+            div []
+                [ viewRuleDescription rule
+                , h4 []
+                    [ span [ class "icon nc-icon-outline users_mobile-contact" ] []
+                    , span [] [ text "Recipients" ]
+                    ]
+                , div [ class "recipients" ] (List.map viewRecipient rule.recipients)
+                ]
+    in
+        div []
+            [ viewContextApps app
+            , viewContextRules appId rule
+            , Container.view (section [ class "highlight" ]) [ (viewWebData viewRule startTime time rule) ]
+            ]
 
 
 pageRules : Model -> Html Msg
@@ -170,33 +207,13 @@ pageRules { app, appId, rule, rules, startTime, time } =
             (\rule -> viewRuleItem (Navigate (Route.Rule appId rule.id)) rule)
 
         content =
-            case rules of
-                NotAsked ->
-                    [ h3 [] [ text "Initialising" ]
-                    ]
+            viewWebData (viewRuleTable viewItem) startTime time rules
 
-                Loading ->
-                    [ Loader.view 64 (rgb 63 91 96) (Loader.nextStep startTime time)
-                    ]
-
-                Failure err ->
-                    [ h3 [] [ text ("Error: " ++ toString err) ]
-                    ]
-
-                Success rules ->
-                    if List.length rules == 0 then
-                        [ h3 [] [ text "Looks like you haven't created a Rule yet." ]
-                          --, formApp newApp appForm startTime time
-                        ]
-                    else
-                        [ viewRuleTable viewItem rules
-                          --, formApp newApp appForm startTime time
-                        ]
     in
         div []
             [ viewContextApps app
             , viewContextRules appId rule
-            , Container.view (section [ class "highlight" ]) content
+            , Container.view (section [ class "highlight" ]) [ content ]
             ]
 
 
@@ -273,8 +290,7 @@ viewHeader zone =
 viewFooter : Model -> Html Msg
 viewFooter model =
     Container.view (footer [])
-        [ viewDebug model
-        ]
+        [ viewDebug model ]
 
 
 viewSelected : Msg -> String -> Html Msg
@@ -285,6 +301,21 @@ viewSelected msg name =
             , span [ class "icon nc-icon-outline arrows-2_skew-down" ] []
             ]
         ]
+
+viewWebData : (a -> Html Msg) -> Time -> Time -> WebData a -> Html Msg
+viewWebData view startTime time data =
+    case data of
+        NotAsked ->
+            h3 [] [ text "Initialising" ]
+
+        Loading ->
+            Loader.view 64 (rgb 63 91 96) (Loader.nextStep startTime time)
+
+        Failure err ->
+            h3 [] [ text ("Error: " ++ toString err) ]
+
+        Success data ->
+            view data
 
 
 

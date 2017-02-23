@@ -42,6 +42,9 @@ update msg model =
         FetchApps response ->
             ( { model | app = NotAsked, apps = response }, Cmd.none )
 
+        FetchRule response ->
+            ( { model | rule = response }, Cmd.none )
+
         FetchRules response ->
             ( { model | rules = response }, Cmd.none )
 

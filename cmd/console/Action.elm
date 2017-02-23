@@ -16,6 +16,7 @@ type Msg
     | AppFormUpdate String String
     | FetchApp (WebData App)
     | FetchApps (WebData (List App))
+    | FetchRule (WebData Rule)
     | FetchRules (WebData (List Rule))
     | ListApps
     | LocationChange Location

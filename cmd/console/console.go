@@ -199,6 +199,13 @@ func main() {
 		),
 	)
 
+	router.Methods("GET").Path("/api/apps/{appID:[0-9]+}/rules/{ruleID:[0-9]+}").Name("ruleRetrieve").HandlerFunc(
+		handler.Wrap(
+			withConstraints,
+			handler.RuleRetrieve(core.RuleFetch(apps, rules)),
+		),
+	)
+
 	router.Methods("GET").Path("/api/apps/{appID:[0-9]+}/rules").Name("ruleList").HandlerFunc(
 		handler.Wrap(
 			withConstraints,

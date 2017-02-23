@@ -77,6 +77,21 @@ div.loader {
 	padding: 6rem 0rem;
 }
 
+div.recipient {
+	border-left: 0.8rem solid rgb(234, 234, 234);
+	font-size: 1.8rem;
+	margin-bottom: 4rem;
+	padding: 0.8rem 1.4rem;
+}
+
+div.recipient div.target {
+	/*font-weight: 500;*/
+}
+
+div.recipient div.urn pre {
+	display: inline-block;
+}
+
 footer {
 	margin-top: 10rem;
 }
@@ -171,6 +186,29 @@ h3 {
 	font-weight: 300;
 	font-size: 3.2rem;
 	font-style: italic;
+}
+
+h3 div.icon {
+	display: inline-block;
+	font-style: normal;
+	padding: 0 1rem;
+}
+
+h3 div.icon span.nc-icon-outline {
+	margin-right: 0.4rem;
+}
+
+h3 strong {
+	font-weight: 500;
+	font-style: normal;
+	padding: 0 0.8rem;
+}
+
+h4 {
+	font-size: 2.2rem;
+	font-weight: 500;
+	margin-top: 6rem;
+	text-transform: uppercase;
 }
 
 header {

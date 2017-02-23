@@ -34,6 +34,31 @@ func RuleList(fn core.RuleListFunc) Handler {
 	}
 }
 
+// RuleRetrieve returns a single rule by id.
+func RuleRetrieve(fn core.RuleFetchFunc) Handler {
+	return func(ctx context.Context, w http.ResponseWriter, req *http.Request) {
+		appID, err := extractAppID(req)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		ruleID, err := extractRuleID(req)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		r, err := fn(appID, ruleID)
+		if err != nil {
+			respondError(w, 0, err)
+			return
+		}
+
+		respondJSON(w, http.StatusOK, &payloadRule{rule: r})
+	}
+}
+
 type payloadRule struct {
 	rule *rule.Rule
 }

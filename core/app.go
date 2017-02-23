@@ -75,7 +75,7 @@ func AppFetch(apps app.Service) AppFetchFunc {
 // AppFetchWithCountsFunc returns the App for the given id.
 type AppFetchWithCountsFunc func(id uint64) (*App, error)
 
-// AppWithCountsFetch returns the App for the given id.
+// AppFetchWithCountsFetch returns the App for the given id.
 func AppFetchWithCounts(
 	apps app.Service,
 	rules rule.Service,

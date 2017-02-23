@@ -8,7 +8,7 @@ import App.Api exposing (getApp, getApps)
 import App.Model exposing (App, initAppForm)
 import Formo exposing (Form)
 import Route exposing (Route, parse)
-import Rule.Api exposing (listRules)
+import Rule.Api exposing (getRule, listRules)
 import Rule.Model exposing (Rule)
 
 
@@ -55,6 +55,16 @@ init { zone } location =
                         Cmd.batch
                             [ Cmd.map FetchApp (getApp appId)
                             , Cmd.map FetchRules (listRules appId)
+                            ]
+                in
+                    ( (model Loading NotAsked appId), cmds )
+
+            Just (Route.Rule appId ruleId) ->
+                let
+                    cmds =
+                        Cmd.batch
+                            [ Cmd.map FetchApp (getApp appId)
+                            , Cmd.map FetchRule (getRule appId ruleId)
                             ]
                 in
                     ( (model Loading NotAsked appId), cmds )

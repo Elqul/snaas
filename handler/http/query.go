@@ -31,6 +31,7 @@ const (
 	keyLimit        = "limit"
 	keyPostID       = "postID"
 	keyReactionType = "reactionType"
+	keyRuleID       = "ruleID"
 	keyState        = "state"
 	keyUserID       = "userID"
 	keyUserQuery    = "q"
@@ -310,6 +311,10 @@ func extractPostOpts(r *http.Request) (object.QueryOptions, error) {
 
 func extractReactionOpts(r *http.Request) (reaction.QueryOptions, error) {
 	return reaction.QueryOptions{}, nil
+}
+
+func extractRuleID(r *http.Request) (uint64, error) {
+	return strconv.ParseUint(mux.Vars(r)[keyRuleID], 10, 64)
 }
 
 func extractState(r *http.Request) connection.State {

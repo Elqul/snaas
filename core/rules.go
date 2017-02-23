@@ -5,6 +5,34 @@ import (
 	"github.com/tapglue/snaas/service/rule"
 )
 
+// RuleFetchFunc returns the Rule for the given appID and id.
+type RuleFetchFunc func(appID, id uint64) (*rule.Rule, error)
+
+// RuleFetch returns the Rule for the given appID and id.
+func RuleFetch(apps app.Service, rules rule.Service) RuleFetchFunc {
+	return func(appID, id uint64) (*rule.Rule, error) {
+		currentApp, err := AppFetch(apps)(appID)
+		if err != nil {
+			return nil, err
+		}
+
+		rs, err := rules.Query(currentApp.Namespace(), rule.QueryOptions{
+			IDs: []uint64{
+				id,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if len(rs) == 0 {
+			return nil, wrapError(ErrNotFound, "rule (%d) not found", id)
+		}
+
+		return rs[0], nil
+	}
+}
+
 // RuleListFunc returns all rules for the current App.
 type RuleListFunc func(appID uint64) (rule.List, error)
 
