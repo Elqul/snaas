@@ -56,28 +56,19 @@ view model =
 pageApp : Model -> Html Msg
 pageApp { app, startTime, time } =
     let
+        viewEntities app =
+            List.map viewEntity
+                [ ( app.counts.rules, "Rules", "education_book-39", (Navigate (Route.Rules app.id)) )
+                , ( app.counts.users, "Users", "users_multiple-11", (Navigate (Route.Users app.id)) )
+                ]
+
         viewApp app =
             div []
                 [ h3 []
                     [ text app.name
                     ]
                 , p [] [ text app.description ]
-                , ul [ class "entities" ]
-                    [ li []
-                        [ a [ onClick (Navigate (Route.Rules app.id)), title "Rules" ]
-                            [ span [ class "icon nc-icon-glyph education_book-39" ] []
-                            , span [] [ text "Rules -" ]
-                            , span [ class "count" ] [ text (toString app.counts.rules) ]
-                            ]
-                        ]
-                    , li []
-                        [ a [ onClick (Navigate (Route.Users app.id)), title "Rules" ]
-                            [ span [ class "icon nc-icon-glyph users_multiple-11" ] []
-                            , span [] [ text "Users -" ]
-                            , span [ class "count" ] [ text (toString app.counts.users) ]
-                            ]
-                        ]
-                    ]
+                , ul [ class "entities" ] (viewEntities app)
                 ]
 
     in
@@ -92,7 +83,7 @@ pageApps : Model -> Html Msg
 pageApps { app, apps, appForm, newApp, startTime, time } =
     let
         viewItem =
-            (\app -> viewAppItem (SelectApp app.id) app)
+            (\app -> viewAppItem (Navigate (Route.App app.id)) app)
 
         viewApps apps =
             if List.length apps == 0 then
@@ -178,14 +169,30 @@ pageRule { app, appId, rule, startTime, time } =
                         ]
                     )
                 , div [ class "templates" ]
-                    [ span [] [ text "Templates: " ]
-                    , strong [] [ text (toString (List.length (Dict.toList recipient.templates))) ]
+                    [ viewTemplates recipient.templates
+                    ]
+                ]
+
+        viewActions rule =
+            ul [ class "actions" ]
+                [ li []
+                    [ a []
+                        [ span [ class "icon nc-icon-glyph ui-1_edit-76" ] []
+                        , span [] [ text "edit" ]
+                        ]
+                    ]
+                , li []
+                    [ a [ onClick (RuleDeleteAsk rule.id) ]
+                        [ span [ class "icon nc-icon-glyph ui-1_trash" ] []
+                        , span [] [ text "delete" ]
+                        ]
                     ]
                 ]
 
         viewRule rule =
             div []
-                [ viewRuleDescription rule
+                [ viewActions rule
+                , viewRuleDescription rule
                 , h4 []
                     [ span [ class "icon nc-icon-outline users_mobile-contact" ] []
                     , span [] [ text "Recipients" ]
@@ -256,7 +263,7 @@ viewContextApps app =
 viewContextRules : String -> WebData Rule -> Html Msg
 viewContextRules appId rule =
     let
-        ( selected, viewRule ) =
+        ( _, viewRule ) =
             case rule of
                 Success rule ->
                     ( True, viewSelected (Navigate (Route.Rule appId rule.id)) rule.name )
@@ -264,7 +271,7 @@ viewContextRules appId rule =
                 _ ->
                     ( False, span [] [] )
     in
-        viewContext "Rules" (Navigate (Route.Rules appId)) viewRule selected "education_book-39"
+        viewContext "Rules" (Navigate (Route.Rules appId)) viewRule False "education_book-39"
 
 
 viewDebug : Model -> Html Msg
@@ -273,6 +280,16 @@ viewDebug model =
         [ text (toString model)
         ]
 
+viewEntity : ( Int, String, String, Msg ) -> Html Msg
+viewEntity ( count, entity, icon, msg ) =
+    li []
+        [ a [ onClick msg, title entity ]
+            [ div [ class "icon" ]
+                [ span [ class ("icon nc-icon-glyph " ++ icon) ] [] ]
+            , div [] [ span [ class "count" ] [ text (toString count) ] ]
+            , div [] [ span [] [ text entity ] ]
+            ]
+        ]
 
 viewHeader : String -> Html Msg
 viewHeader zone =

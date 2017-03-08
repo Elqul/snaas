@@ -11,6 +11,30 @@ import (
 	"github.com/tapglue/snaas/service/rule"
 )
 
+func RuleDelete(fn core.RuleDeleteFunc) Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		appID, err := extractAppID(r)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		ruleID, err := extractRuleID(r)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		err = fn(appID, ruleID)
+		if err != nil {
+			respondError(w, 0, err)
+			return
+		}
+
+		respondJSON(w, http.StatusNoContent, nil)
+	}
+}
+
 // RuleList returns all rules.
 func RuleList(fn core.RuleListFunc) Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
@@ -66,6 +90,7 @@ type payloadRule struct {
 func (p *payloadRule) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Active     bool            `json:"active"`
+		Criteria   interface{}     `json:"criteria"`
 		Deleted    bool            `json:"deleted"`
 		Ecosystem  int             `json:"ecosystem"`
 		Entity     int             `json:"entity"`
@@ -74,6 +99,7 @@ func (p *payloadRule) MarshalJSON() ([]byte, error) {
 		Recipients rule.Recipients `json:"recipients"`
 	}{
 		Active:     p.rule.Active,
+		Criteria:   p.rule.Criteria,
 		Deleted:    p.rule.Deleted,
 		Ecosystem:  int(p.rule.Ecosystem),
 		Entity:     int(p.rule.Type),

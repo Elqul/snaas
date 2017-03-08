@@ -57,7 +57,15 @@ var (
   </head>
   <body>
     <script type="text/javascript">
-      Elm.Main.fullscreen({zone: "{{.Zone}}"});
+		var app = Elm.Main.fullscreen({zone: "{{.Zone}}"});
+
+		app.ports.ask.subscribe(function(id) {
+			var answer = window.confirm("Do you really want to delete this Rule?");
+
+			if (answer) {
+				app.ports.confirm.send(id);
+			}
+		})
     </script>
  </body>
 </html>`
@@ -196,6 +204,13 @@ func main() {
 		handler.Wrap(
 			withConstraints,
 			handler.AppCreate(core.AppCreate(apps)),
+		),
+	)
+
+	router.Methods("DELETE").Path("/api/apps/{appID:[0-9]+}/rules/{ruleID:[0-9]+}").Name("ruleDelete").HandlerFunc(
+		handler.Wrap(
+			withConstraints,
+			handler.RuleDelete(core.RuleDelete(apps, rules)),
 		),
 	)
 

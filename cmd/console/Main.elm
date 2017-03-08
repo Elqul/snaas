@@ -3,6 +3,7 @@ module Main exposing (main)
 import AnimationFrame
 import Navigation
 import Action exposing (Msg(..))
+import Ask exposing (confirm)
 import Model exposing (Flags, Model, init)
 import Update exposing (update)
 import View exposing (view)
@@ -18,10 +19,11 @@ main =
         }
 
 
-
 -- SUBSCRIPTION
-
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    AnimationFrame.times Tick
+    Sub.batch
+        [ AnimationFrame.times Tick
+        , confirm RuleDeleteConfirm
+        ]

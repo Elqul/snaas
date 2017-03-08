@@ -306,12 +306,7 @@ table tbody {
 
 table tbody tr {
 	border-bottom: 0.1rem solid #efefef;
-	cursor: pointer;
 	transition: all 0.15s ease;
-}
-
-table tbody tr:hover {
-	background: rgb(236, 240, 241);
 }
 
 table tbody tr td {
@@ -322,6 +317,33 @@ table td.icon,
 table th.icon {
 	text-align: center;
 	width: 7rem;
+}
+
+table.navigation tbody tr {
+	cursor: pointer;
+}
+
+table.navigation tbody tr:hover {
+	background: rgb(236, 240, 241);
+}
+
+ul.actions {
+	display: flex;
+	justify-content: flex-end;
+	padding: 0;
+}
+
+ul.actions li {
+	font-size: 2rem;
+	font-weight: 500;
+	list-style: none;
+	margin: 0 0 0 2rem;
+	padding: 0;
+	text-transform: capitalize;
+}
+
+ul.actions li span.icon {
+	margin-right: 0.4rem;
 }
 
 ul.entities {
@@ -335,11 +357,6 @@ ul.entities li {
 	margin-bottom: 1.2rem;
 }
 
-ul.entities span.count {
-	font-weight: 500;
-	margin-left: 0.4rem;
-}
-
-ul.entities span.icon {
-	margin-right: 0.4rem;
+ul.entities li a {
+	display: flex;
 }

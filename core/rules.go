@@ -5,6 +5,44 @@ import (
 	"github.com/tapglue/snaas/service/rule"
 )
 
+// RuleDeleteFunc removes the rule permanently.
+type RuleDeleteFunc func(appID, id uint64) error
+
+func RuleDelete(
+	apps app.Service,
+	rules rule.Service,
+) RuleDeleteFunc {
+	return func(appID, id uint64) error {
+		currentApp, err := AppFetch(apps)(appID)
+		if err != nil {
+			return err
+		}
+
+		rs, err := rules.Query(currentApp.Namespace(), rule.QueryOptions{
+			IDs: []uint64{
+				id,
+			},
+		})
+		if err != nil {
+			return err
+		}
+
+		if len(rs) == 0 {
+			return wrapError(ErrNotFound, "rule (%d) not found", id)
+		}
+
+		r := rs[0]
+		r.Deleted = true
+
+		_, err = rules.Put(currentApp.Namespace(), r)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
 // RuleFetchFunc returns the Rule for the given appID and id.
 type RuleFetchFunc func(appID, id uint64) (*rule.Rule, error)
 

@@ -5,6 +5,7 @@ import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Rule.Model exposing (Rule)
 
+import Rule.Model exposing (Entity(..))
 
 viewActivated : Bool -> Html msg
 viewActivated active =
@@ -22,22 +23,22 @@ viewEcosystem ecosystem =
         _ ->
             span [ class "nc-icon-outline ui-2_alert", title "unknown" ] []
 
-viewEntity : Int -> Html msg
+viewEntity : Entity -> Html msg
 viewEntity entity =
     case entity of
-        0 ->
+        Connection ->
             span [ class "nc-icon-outline arrows-2_conversion", title "Connection" ] []
 
-        1 ->
+        Event ->
             span [ class "nc-icon-outline ui-1_bell-53", title "event" ] []
 
-        2 ->
+        Object ->
             span [ class "nc-icon-outline ui-1_database", title "Object" ] []
 
-        3 ->
+        Reaction ->
             span [ class "nc-icon-outline ui-2_like", title "Reaction" ] []
 
-        _ ->
+        UnknownEntity ->
             span [ class "nc-icon-outline ui-2_alert", title "Unknown" ] []
 
 viewRuleDescription : Rule -> Html msg
@@ -59,31 +60,31 @@ viewRuleDescription rule =
 
         entity =
             case rule.entity of
-                0 ->
+                Connection ->
                     div [ class "icon", title "Connections" ]
                         [ span [ class "nc-icon-outline arrows-2_conversion" ] []
                         , span [] [ text "Connections" ]
                         ]
 
-                1 ->
+                Event ->
                     div [ class "icon", title "Events" ]
                         [ span [ class "nc-icon-outline ui-1_bell-53" ] []
                         , span [] [ text "Events" ]
                         ]
 
-                2 ->
+                Object ->
                     div [ class "icon", title "Objects" ]
                         [ span [ class "nc-icon-outline ui-1_database" ] []
                         , span [] [ text "Objects" ]
                         ]
 
-                3 ->
+                Reaction ->
                     div [ class "icon", title "Reactions" ]
                         [ span [ class "nc-icon-outline ui-2_like" ] []
                         , span [] [ text "Reactions" ]
                         ]
 
-                _ ->
+                UnknownEntity ->
                     div [ class "icon", title "Unknown" ]
                         [ span [ class "nc-icon-outline ui-2_alert" ] []
                         , span [] [ text "Unknown" ]
@@ -115,9 +116,9 @@ viewRuleTable : (Rule -> Html msg) -> List Rule -> Html msg
 viewRuleTable item rules =
     let
         list =
-            List.sortBy .entity rules
+            List.sortWith sortByEntity rules
     in
-        table []
+        table [ class "navigation" ]
             [ thead []
                 [ tr []
                     [ th [ class "icon" ] [ text "active" ]
@@ -129,3 +130,43 @@ viewRuleTable item rules =
                 ]
             , tbody [] (List.map item list)
             ]
+
+
+sortByEntity : Rule -> Rule -> Order
+sortByEntity a b =
+    case (a.entity, b.entity) of
+        (Connection, Connection) ->
+            EQ
+
+        (Connection, _) ->
+            LT
+
+        (Event, Connection) ->
+            GT
+
+        (Event, Event) ->
+            EQ
+
+        (Event, _) ->
+            LT
+
+        (Object, Connection) ->
+            GT
+
+        (Object, Event) ->
+            GT
+
+        (Object, Object) ->
+            EQ
+
+        (Object, _) ->
+            LT
+
+        (Reaction, Reaction) ->
+            EQ
+
+        (Reaction, _) ->
+            GT
+
+        (UnknownEntity, _) ->
+            GT

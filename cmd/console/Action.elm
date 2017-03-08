@@ -18,9 +18,10 @@ type Msg
     | FetchApps (WebData (List App))
     | FetchRule (WebData Rule)
     | FetchRules (WebData (List Rule))
-    | ListApps
     | LocationChange Location
     | Navigate Route
     | NewApp (WebData App)
-    | SelectApp String
+    | RuleDeleteAsk String
+    | RuleDeleteConfirm String
+    | RuleDelete (WebData Bool)
     | Tick Time

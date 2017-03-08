@@ -2,11 +2,13 @@ module Update exposing (update)
 
 import RemoteData exposing (RemoteData(Loading, NotAsked), WebData)
 import Action exposing (Msg(..))
+import Ask exposing (ask)
 import Formo exposing (blurElement, elementValue, focusElement, updateElementValue, validateForm)
 import Model exposing (Flags, Model, init)
 import App.Api exposing (createApp)
 import App.Model exposing (initAppForm)
 import Route
+import Rule.Api exposing (deleteRule)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -48,9 +50,6 @@ update msg model =
         FetchRules response ->
             ( { model | rules = response }, Cmd.none )
 
-        ListApps ->
-            ( model, Cmd.map LocationChange (Route.navigate Route.Apps) )
-
         LocationChange location ->
             init (Flags model.zone) location
 
@@ -60,8 +59,14 @@ update msg model =
         NewApp response ->
             ( { model | appForm = initAppForm, apps = (appendWebData model.apps response), newApp = NotAsked }, Cmd.none )
 
-        SelectApp id ->
-            ( model, Cmd.map LocationChange (Route.navigate (Route.App id)) )
+        RuleDeleteAsk id ->
+            ( model, ask id )
+
+        RuleDeleteConfirm id ->
+            ( model, Cmd.map RuleDelete (deleteRule model.appId id) )
+
+        RuleDelete _ ->
+            ( model, Cmd.map LocationChange (Route.navigate (Route.Rules model.appId)) )
 
         Tick time ->
             let

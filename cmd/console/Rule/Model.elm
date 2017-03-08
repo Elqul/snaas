@@ -1,4 +1,4 @@
-module Rule.Model exposing (Rule, decode, decodeList, targetString)
+module Rule.Model exposing (Entity(..), Rule, decode, decodeList, targetString)
 
 import Dict exposing (Dict)
 import Json.Decode as Decode
@@ -6,6 +6,12 @@ import Json.Decode as Decode
 
 -- MODEL
 
+type Criteria
+    = EventCriteria
+    | ObjectCriteria
+
+type Entity
+    = Connection | Event | Object | Reaction | UnknownEntity
 
 type alias Recipient =
     { query : List Query
@@ -17,20 +23,39 @@ type alias Recipient =
 
 type alias Rule =
     { active : Bool
+    , criteria : Criteria
     , deleted : Bool
     , ecosystem : Int
-    , entity : Int
+    , entity : Entity
     , id : String
     , name : String
     , recipients : List Recipient
     }
 
 type Target
-    = Commenters | PostOwner | Unknown
+    = Commenters | PostOwner | UnknownTarget
 
 type alias Query =
     ( String, String )
 
+
+matchEntity : Int -> Entity
+matchEntity enum =
+    case enum of
+        0 ->
+            Connection
+
+        1 ->
+            Event
+
+        2 ->
+            Object
+
+        3 ->
+            Reaction
+
+        _ ->
+            UnknownEntity
 
 matchTarget : Query -> Target
 matchTarget query =
@@ -42,7 +67,7 @@ matchTarget query =
             PostOwner
 
         ( _, _ ) ->
-            Unknown
+            UnknownTarget
 
 targetString : Target -> String
 targetString target =
@@ -53,7 +78,7 @@ targetString target =
         PostOwner ->
             "PostOwner"
 
-        Unknown ->
+        UnknownTarget ->
             "Unknown"
 
 
@@ -63,15 +88,21 @@ targetString target =
 
 decode : Decode.Decoder Rule
 decode =
-    Decode.map7 Rule
+    Decode.map8 Rule
         (Decode.field "active" Decode.bool)
+        (Decode.field "criteria" decodeCriteria)
         (Decode.field "deleted" Decode.bool)
         (Decode.field "ecosystem" Decode.int)
-        (Decode.field "entity" Decode.int)
+        (Decode.andThen decodeEntity (Decode.field "entity" Decode.int))
         (Decode.field "id" Decode.string)
         (Decode.field "name" Decode.string)
         (Decode.field "recipients" (Decode.list decodeRecipient))
 
+decodeCriteria =
+    Decode.succeed EventCriteria
+
+decodeEntity raw =
+    Decode.succeed (matchEntity raw)
 
 decodeList : Decode.Decoder (List Rule)
 decodeList =
