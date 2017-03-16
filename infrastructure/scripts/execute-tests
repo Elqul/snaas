@@ -5,10 +5,13 @@ set -o pipefail
 
 echo "|> prepare env"
 export CWD=$(pwd)
-source ~/.gimme/envs/go1.7.5.env
+#source ~/.gimme/envs/go1.7.5.env
 
 echo "|> execute tests"
-cd /home/ubuntu/.go_workspace/src/github.com/tapglue/snaas
+#cd /home/ubuntu/.go_workspace/src/github.com/tapglue/snaas
+
+cd $HOME/Projects/Go/src/github.com/tapglue/snaas/
+
 go test \
 	-v \
 	-race \
@@ -29,4 +32,4 @@ go test \
 	-race \
 	-tags integration \
 	./service/... \
-	-postgres.url="postgres://ubuntu:unicode@127.0.0.1/circle_test?sslmode-disable"
+	-postgres.url="postgres://tapglue:tapglue@127.0.0.1/circle_test?sslmode-disable"

@@ -1,38 +1,42 @@
 #!/usr/bin/env bash
 
+set -x
 set -e
 
 echo "|> prepare env"
-export PROJECT=/home/ubuntu/.go_workspace/src/github.com/tapglue/snaas
+export HOME=/home/neon
+export PROJECT=$HOME/Projects/Go/src/github.com/tapglue/snaas
 export REVISION=$(git rev-parse --short HEAD)
-source ~/.gimme/envs/go1.7.5.env
+#source ~/.gimme/envs/go1.7.5.env
+
+CIRCLE_BUILD_NUM=1
 
 echo "|> build gateway-http"
-docker run \
+sudo docker run \
 	-e GODEBUG=netdns=go \
 	--rm \
-	-v ~/.go_workspace:/go \
+	-v $HOME/Projects/Go:/go \
 	-w /go/src/github.com/tapglue/snaas \
-	golang:1.7.5-alpine3.5 \
-	go build \
-		-ldflags "-X main.revision=${REVISION}" \
+	golang:1.8.0-alpine \
+	sh -c "go build \
+		-ldflags \"-X main.revision=${REVISION}\" \
 		-o gateway-http_${CIRCLE_BUILD_NUM} \
-		cmd/gateway-http/*.go
+		cmd/gateway-http/*.go"
 
 echo "|> build sims"
-docker run \
+sudo docker run \
 	-e GODEBUG=netdns=go \
 	--rm \
-	-v ~/.go_workspace:/go \
+	-v $HOME/Projects/Go:/go \
 	-w /go/src/github.com/tapglue/snaas \
-	golang:1.7.5-alpine3.5 \
-	go build \
-		-ldflags "-X main.revision=${REVISION}" \
+	golang:1.8.0-alpine \
+	sh -c "go build \
+		-ldflags \"-X main.revision=${REVISION}\" \
 		-o sims_${CIRCLE_BUILD_NUM} \
-		cmd/sims/*.go
+		cmd/sims/*.go"
 
 echo "|> build container"
-docker build \
+sudo docker build \
 	-f ${PROJECT}/infrastructure/docker/snaas.docker \
     -t tapglue/snaas:${CIRCLE_BUILD_NUM} \
     --build-arg GATEWAY_HTTP_BINARY=gateway-http_${CIRCLE_BUILD_NUM} \
