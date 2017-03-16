@@ -25,7 +25,7 @@ viewAppItem msg app =
 
 viewAppsTable : (App -> Html msg) -> List App -> Html msg
 viewAppsTable item apps =
-    table []
+    table [ class "navigation" ]
         [ thead []
             [ tr []
                 [ th [ class "icon" ] [ text "status" ]

@@ -2,13 +2,13 @@ module Update exposing (update)
 
 import RemoteData exposing (RemoteData(Loading, NotAsked), WebData)
 import Action exposing (Msg(..))
-import Ask exposing (ask)
+import Ask exposing (askRuleActivate, askRuleDeactivate, askRuleDelete)
 import Formo exposing (blurElement, elementValue, focusElement, updateElementValue, validateForm)
 import Model exposing (Flags, Model, init)
 import App.Api exposing (createApp)
 import App.Model exposing (initAppForm)
 import Route
-import Rule.Api exposing (deleteRule)
+import Rule.Api exposing (activateRule, deactivateRule, deleteRule)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -59,8 +59,32 @@ update msg model =
         NewApp response ->
             ( { model | appForm = initAppForm, apps = (appendWebData model.apps response), newApp = NotAsked }, Cmd.none )
 
+        RuleActivate (Err _) ->
+            ( model, Cmd.none )
+
+        RuleActivate (Ok id) ->
+            ( model, Cmd.map LocationChange (Route.navigate (Route.Rule model.appId id)) )
+
+        RuleActivateAsk id ->
+            ( model, askRuleActivate id )
+
+        RuleActivateConfirm id ->
+            ( model, activateRule RuleActivate model.appId id )
+
+        RuleDeactivate (Err _) ->
+            ( model, Cmd.none )
+
+        RuleDeactivate (Ok id) ->
+            ( model, Cmd.map LocationChange (Route.navigate (Route.Rule model.appId id)) )
+
+        RuleDeactivateAsk id ->
+            ( model, askRuleDeactivate id )
+
+        RuleDeactivateConfirm id ->
+            ( model, deactivateRule RuleDeactivate model.appId id )
+
         RuleDeleteAsk id ->
-            ( model, ask id )
+            ( model, askRuleDelete id )
 
         RuleDeleteConfirm id ->
             ( model, Cmd.map RuleDelete (deleteRule model.appId id) )

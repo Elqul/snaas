@@ -11,6 +11,54 @@ import (
 	"github.com/tapglue/snaas/service/rule"
 )
 
+func RuleActivate(fn core.RuleActivateFunc) Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		appID, err := extractAppID(r)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		ruleID, err := extractRuleID(r)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		err = fn(appID, ruleID)
+		if err != nil {
+			respondError(w, 0, err)
+			return
+		}
+
+		respondJSON(w, http.StatusNoContent, nil)
+	}
+}
+
+func RuleDeactivate(fn core.RuleDeactivateFunc) Handler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		appID, err := extractAppID(r)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		ruleID, err := extractRuleID(r)
+		if err != nil {
+			respondError(w, 0, wrapError(ErrBadRequest, err.Error()))
+			return
+		}
+
+		err = fn(appID, ruleID)
+		if err != nil {
+			respondError(w, 0, err)
+			return
+		}
+
+		respondJSON(w, http.StatusNoContent, nil)
+	}
+}
+
 func RuleDelete(fn core.RuleDeleteFunc) Handler {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		appID, err := extractAppID(r)

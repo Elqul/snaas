@@ -173,9 +173,26 @@ pageRule { app, appId, rule, startTime, time } =
                     ]
                 ]
 
+        viewActiveAction rule =
+            if rule.active then
+                li []
+                    [ a [ onClick (RuleDeactivateAsk rule.id) ]
+                        [ span [ class "icon nc-icon-glyph ui-1_circle-remove" ] []
+                        , span [] [ text "deactivate" ]
+                        ]
+                    ]
+            else
+                li []
+                    [ a [ onClick (RuleActivateAsk rule.id) ]
+                        [ span [ class "icon nc-icon-glyph ui-1_check-circle-08" ] []
+                        , span [] [ text "activate" ]
+                        ]
+                    ]
+
         viewActions rule =
             ul [ class "actions" ]
-                [ li []
+                [ viewActiveAction rule
+                , li []
                     [ a []
                         [ span [ class "icon nc-icon-glyph ui-1_edit-76" ] []
                         , span [] [ text "edit" ]
@@ -307,7 +324,8 @@ viewHeader zone =
 viewFooter : Model -> Html Msg
 viewFooter model =
     Container.view (footer [])
-        [ viewDebug model ]
+        []
+        --[ viewDebug model ]
 
 
 viewSelected : Msg -> String -> Html Msg

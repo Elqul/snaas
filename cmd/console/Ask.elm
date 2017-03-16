@@ -1,5 +1,20 @@
-port module Ask exposing (ask, confirm)
+port module Ask exposing
+    ( askRuleActivate
+    , askRuleDeactivate
+    , askRuleDelete
+    , confirmRuleActivate
+    , confirmRuleDeactivate
+    , confirmRuleDelete
+    )
 
-port ask : String -> Cmd msg
+port askRuleActivate : String -> Cmd msg
 
-port confirm : (String -> msg) -> Sub msg
+port askRuleDeactivate : String -> Cmd msg
+
+port askRuleDelete : String -> Cmd msg
+
+port confirmRuleActivate : ( String -> msg ) -> Sub msg
+
+port confirmRuleDeactivate : ( String -> msg ) -> Sub msg
+
+port confirmRuleDelete : ( String -> msg ) -> Sub msg

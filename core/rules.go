@@ -5,9 +5,69 @@ import (
 	"github.com/tapglue/snaas/service/rule"
 )
 
+// RuleActivateFunc puts the rule in an active state.
+type RuleActivateFunc func(appID, id uint64) error
+
+func RuleActivate(
+	apps app.Service,
+	rules rule.Service,
+) RuleActivateFunc {
+	return func(appID, id uint64) error {
+		currentApp, err := AppFetch(apps)(appID)
+		if err != nil {
+			return err
+		}
+
+		r, err := RuleFetch(apps, rules)(appID, id)
+		if err != nil {
+			return err
+		}
+
+		if r.Active {
+			return nil
+		}
+
+		r.Active = true
+
+		_, err = rules.Put(currentApp.Namespace(), r)
+		return err
+	}
+}
+
+// RuleDeactivateFunc puts the rule in an inactive state.
+type RuleDeactivateFunc func(appID, id uint64) error
+
+// RuleDeactivate puts the rule in an inactive state.
+func RuleDeactivate(
+	apps app.Service,
+	rules rule.Service,
+) RuleDeactivateFunc {
+	return func(appID, id uint64) error {
+		currentApp, err := AppFetch(apps)(appID)
+		if err != nil {
+			return err
+		}
+
+		r, err := RuleFetch(apps, rules)(appID, id)
+		if err != nil {
+			return err
+		}
+
+		if !r.Active {
+			return nil
+		}
+
+		r.Active = false
+
+		_, err = rules.Put(currentApp.Namespace(), r)
+		return err
+	}
+}
+
 // RuleDeleteFunc removes the rule permanently.
 type RuleDeleteFunc func(appID, id uint64) error
 
+// RuleDelete removes the rule permanently.
 func RuleDelete(
 	apps app.Service,
 	rules rule.Service,
@@ -18,20 +78,11 @@ func RuleDelete(
 			return err
 		}
 
-		rs, err := rules.Query(currentApp.Namespace(), rule.QueryOptions{
-			IDs: []uint64{
-				id,
-			},
-		})
+		r, err := RuleFetch(apps, rules)(appID, id)
 		if err != nil {
 			return err
 		}
 
-		if len(rs) == 0 {
-			return wrapError(ErrNotFound, "rule (%d) not found", id)
-		}
-
-		r := rs[0]
 		r.Deleted = true
 
 		_, err = rules.Put(currentApp.Namespace(), r)

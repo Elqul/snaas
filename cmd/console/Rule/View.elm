@@ -10,9 +10,9 @@ import Rule.Model exposing (Entity(..))
 viewActivated : Bool -> Html msg
 viewActivated active =
     if active then
-        span [ class "nc-icon-glyph ui-1_check-circle-07" ] []
+        span [ class "nc-icon-outline ui-1_check-circle-08" ] []
     else
-        span [ class "nc-icon-glyph ui-1_circle-remove" ] []
+        span [ class "nc-icon-outline ui-1_circle-remove" ] []
 
 viewEcosystem : Int -> Html msg
 viewEcosystem ecosystem =

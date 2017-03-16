@@ -1,15 +1,47 @@
-module Rule.Api exposing (deleteRule, getRule, listRules)
+module Rule.Api exposing (activateRule, deactivateRule, deleteRule, getRule, listRules)
 
 import Http
 import RemoteData exposing (WebData, sendRequest)
 import Rule.Model exposing (Rule, decode, decodeList)
 
+returnId : String -> Http.Response String -> Result String String
+returnId id response =
+    if response.status.code == 204 then
+        Ok id
+    else
+        Err response.status.message
+
+activateRule : (Result Http.Error String -> msg) -> String -> String -> Cmd msg
+activateRule msg appId ruleId =
+    Http.request
+        { body = Http.emptyBody
+        , expect = Http.expectStringResponse (returnId ruleId)
+        , headers = []
+        , method = "PUT"
+        , timeout = Nothing
+        , url = (ruleUrl appId ruleId) ++ "/activate"
+        , withCredentials = False
+        }
+        |> Http.send msg
+
+deactivateRule : (Result Http.Error String -> msg) -> String -> String -> Cmd msg
+deactivateRule msg appId ruleId =
+    Http.request
+        { body = Http.emptyBody
+        , expect = Http.expectStringResponse (returnId ruleId)
+        , headers = []
+        , method = "PUT"
+        , timeout = Nothing
+        , url = (ruleUrl appId ruleId) ++ "/deactivate"
+        , withCredentials = False
+        }
+        |> Http.send msg
 
 deleteRule : String -> String -> Cmd (WebData Bool)
 deleteRule appId ruleId =
     Http.request
         { body = Http.emptyBody
-        , expect = Http.expectStringResponse readDelete
+        , expect = expectEmpty
         , headers = []
         , method = "DELETE"
         , timeout = Nothing
@@ -29,9 +61,13 @@ listRules appId =
     Http.get ("/api/apps/" ++ appId ++ "/rules") decodeList
         |> sendRequest
 
-readDelete : Http.Response String -> Result String Bool
-readDelete response =
-     if response.status.code == 204 then
+expectEmpty : Http.Expect Bool
+expectEmpty =
+    Http.expectStringResponse readEmpty
+
+readEmpty : Http.Response String -> Result String Bool
+readEmpty response =
+    if response.status.code == 204 then
         Ok True
     else
         Err response.status.message

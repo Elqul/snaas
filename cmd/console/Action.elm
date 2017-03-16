@@ -1,5 +1,6 @@
 module Action exposing (Msg(..))
 
+import Http
 import Navigation exposing (Location)
 import RemoteData exposing (WebData)
 import Time exposing (Time)
@@ -21,6 +22,12 @@ type Msg
     | LocationChange Location
     | Navigate Route
     | NewApp (WebData App)
+    | RuleActivate (Result Http.Error String)
+    | RuleActivateAsk String
+    | RuleActivateConfirm String
+    | RuleDeactivate (Result Http.Error String)
+    | RuleDeactivateAsk String
+    | RuleDeactivateConfirm String
     | RuleDeleteAsk String
     | RuleDeleteConfirm String
     | RuleDelete (WebData Bool)

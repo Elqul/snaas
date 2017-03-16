@@ -59,11 +59,27 @@ var (
     <script type="text/javascript">
 		var app = Elm.Main.fullscreen({zone: "{{.Zone}}"});
 
-		app.ports.ask.subscribe(function(id) {
+		app.ports.askRuleActivate.subscribe(function(id) {
+			var answer = window.confirm("Do you want to activate this Rule?");
+
+			if (answer) {
+				app.ports.confirmRuleActivate.send(id);
+			}
+		})
+
+		app.ports.askRuleDeactivate.subscribe(function(id) {
+			var answer = window.confirm("Do you want to deactivate this Rule?");
+
+			if (answer) {
+				app.ports.confirmRuleDeactivate.send(id);
+			}
+		});
+
+		app.ports.askRuleDelete.subscribe(function(id) {
 			var answer = window.confirm("Do you really want to delete this Rule?");
 
 			if (answer) {
-				app.ports.confirm.send(id);
+				app.ports.confirmRuleDelete.send(id);
 			}
 		})
     </script>
@@ -84,9 +100,8 @@ func main() {
 	flag.Parse()
 
 	// Setup logging.
-	logger := log.NewContext(
+	logger := log.With(
 		log.NewJSONLogger(os.Stdout),
-	).With(
 		"caller", log.Caller(3),
 		"component", component,
 		"revision", revision,
@@ -98,7 +113,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger = log.NewContext(logger).With("host", hostname)
+	logger = log.With(logger, "host", hostname)
 
 	// Setup instrumentation.
 	go func(addr string) {
@@ -204,6 +219,20 @@ func main() {
 		handler.Wrap(
 			withConstraints,
 			handler.AppCreate(core.AppCreate(apps)),
+		),
+	)
+
+	router.Methods("PUT").Path("/api/apps/{appID:[0-9]+}/rules/{ruleID:[0-9]+}/activate").Name("ruleDeactivate").HandlerFunc(
+		handler.Wrap(
+			withConstraints,
+			handler.RuleActivate(core.RuleActivate(apps, rules)),
+		),
+	)
+
+	router.Methods("PUT").Path("/api/apps/{appID:[0-9]+}/rules/{ruleID:[0-9]+}/deactivate").Name("ruleDeactivate").HandlerFunc(
+		handler.Wrap(
+			withConstraints,
+			handler.RuleDeactivate(core.RuleDeactivate(apps, rules)),
 		),
 	)
 
