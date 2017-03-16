@@ -57,10 +57,11 @@ pageApp : Model -> Html Msg
 pageApp { app, startTime, time } =
     let
         viewEntities app =
-            List.map viewEntity
-                [ ( app.counts.rules, "Rules", "education_book-39", (Navigate (Route.Rules app.id)) )
-                , ( app.counts.users, "Users", "users_multiple-11", (Navigate (Route.Users app.id)) )
-                ]
+            ul [ class "entities" ]
+                (List.map viewEntity
+                    [ ( app.counts.rules, "Rules", "education_book-39", (Navigate (Route.Rules app.id)) )
+                    , ( app.counts.users, "Users", "users_multiple-11", (Navigate (Route.Users app.id)) )
+                    ])
 
         viewApp app =
             div []
@@ -68,14 +69,16 @@ pageApp { app, startTime, time } =
                     [ text app.name
                     ]
                 , p [] [ text app.description ]
-                , ul [ class "entities" ] (viewEntities app)
                 ]
 
     in
-        div []
+        main_ []
             [ viewContextApps app
             , Container.view (section [ class "highlight" ])
                 [ viewWebData viewApp startTime time app ]
+            , Container.view (section [ id "entities" ])
+                [  viewWebData viewEntities startTime time app
+                ]
             ]
 
 
@@ -303,8 +306,10 @@ viewEntity ( count, entity, icon, msg ) =
         [ a [ onClick msg, title entity ]
             [ div [ class "icon" ]
                 [ span [ class ("icon nc-icon-glyph " ++ icon) ] [] ]
-            , div [] [ span [ class "count" ] [ text (toString count) ] ]
-            , div [] [ span [] [ text entity ] ]
+            , div [ class "info" ]
+                [ div [ class "count" ] [ text (toString count) ]
+                , div [ class "name" ] [ text entity ]
+                ]
             ]
         ]
 
