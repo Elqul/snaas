@@ -35,6 +35,18 @@ sudo docker run \
 		-o sims_${CIRCLE_BUILD_NUM} \
 		cmd/sims/*.go"
 
+echo "|> build dataz"
+sudo docker run \
+	-e GODEBUG=netdns=go \
+	--rm \
+	-v $HOME/Projects/Go:/go \
+	-w /go/src/github.com/tapglue/snaas \
+	golang:1.8.0-alpine \
+	sh -c "go build \
+		-ldflags \"-X main.revision=${REVISION}\" \
+		-o dataz_${CIRCLE_BUILD_NUM} \
+		cmd/dataz/*.go"
+		
 echo "|> build container"
 sudo docker build \
 	-f ${PROJECT}/infrastructure/docker/snaas.docker \
