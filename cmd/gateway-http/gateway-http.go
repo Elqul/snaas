@@ -10,6 +10,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awsSession "github.com/aws/aws-sdk-go/aws/session"
+	platformSNS "github.com/tapglue/snaas/platform/sns"
+	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
@@ -31,6 +33,7 @@ import (
 	"github.com/tapglue/snaas/service/reaction"
 	"github.com/tapglue/snaas/service/session"
 	"github.com/tapglue/snaas/service/user"
+	"github.com/tapglue/snaas/service/platform"
 )
 
 // Logging and telemetry identifiers.
@@ -184,6 +187,7 @@ func main() {
 		})
 		redisPool   = redis.Pool(*redisAddr, "")
 		rateLimiter = limiter.Redis(redisPool, prefixRateLimiter)
+		snsAPI 	    = sns.New(aSession)
 		sqsAPI      = sqs.New(aSession)
 	)
 
@@ -405,6 +409,17 @@ func main() {
 		serviceOpLatency,
 	)(users)
 	users = user.LogMiddleware(logger, storeService)(users)
+
+	var platforms platform.Service
+	platforms = platform.PostgresService(pgClient)
+	//platforms = platform.InstrumentMiddleware(
+	//	component,
+	//	storeService,
+	//	serviceErrCount,
+	//	serviceOpCount,
+	//	serviceOpLatency,
+	//)(platforms)
+	//platforms = platform.LogMiddleware(logger, storeService)(platforms)
 
 	// Setup middlewares.
 	var (
@@ -867,6 +882,15 @@ func main() {
 			withApp,
 			handler.UserCreate(
 				core.UserCreate(sessions, users),
+			),
+		),
+	)
+
+	current.Methods("POST").Path(`/platforms`).Name("platformCreate").HandlerFunc(
+		handler.Wrap(
+			withApp,
+			handler.PlatformCreate(
+				core.PlatformCreate(platforms, platformSNS.AppCreateAPNS(snsAPI, platformSNS.TopicStateChangeARN), platformSNS.AppCreateAPNSSandbox(snsAPI, platformSNS.TopicStateChangeARN), platformSNS.AppCreateGCM(snsAPI, platformSNS.TopicStateChangeARN)),
 			),
 		),
 	)
