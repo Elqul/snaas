@@ -18,6 +18,9 @@ const (
 	AttributeDeliveryFailure    = "EventDeliveryFailure"
 	AttributePlatformCredential = "PlatformCredential"
 	AttributePlatformPrincipal  = "PlatformPrincipal"
+
+	// Needs to be created in Amazon SNS 
+	TopicStateChangeARN         = ""
 )
 
 // Message Types.
