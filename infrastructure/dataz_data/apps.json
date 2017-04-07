@@ -1,0 +1,12 @@
+{
+    "backend_token": "78a62cac15972206e2b2da4f5a42c5c4",
+    "description": "Awesome App Description",
+    "enabled": true,
+    "-": 1,
+    "in_production": false,
+    "name": "Awesome App",
+    "token": "2da2d79336c2773c630ce46f5d24cb76",
+    "url": "https://www.awesomeapp.com",
+    "created_at": "2017-03-17T08:44:13.213Z",
+    "updated_at": "2017-03-17T08:44:13.213Z"
+}
