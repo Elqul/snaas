@@ -1,0 +1,10 @@
+rsync.ignore
+sync.sh
+.git
+.gitignore
+.directory 
+.idea
+dataz
+gateway-http
+sims
+terraformer
